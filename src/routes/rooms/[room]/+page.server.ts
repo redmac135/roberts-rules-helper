@@ -10,7 +10,7 @@ export const load = (async ({ params }) => {
 	const { room: roomId } = params;
 	const isRoute = MemberInfo.pick({ room: true }).safeParse(params);
 	if (!isRoute.success) throw error(404, 'There be dragons...');
-	const title = roomId === 'council';
+	const title = roomId;
 	const roomMembers = members;
 	return {
 		room: {

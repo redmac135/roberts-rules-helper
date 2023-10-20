@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const MemberInfo = z.object({
 	set_at: z.number(),
 	name: z.string(),
-	status: z.string().regex(/^point$|^response$|^poi$/, 'Not a valid option.'),
+	status: z.enum(['point', 'response', 'poi', '']),
 	room: z.enum(['council'])
 });
 

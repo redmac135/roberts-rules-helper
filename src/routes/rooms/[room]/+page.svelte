@@ -8,12 +8,14 @@
 
 	export let form: ActionData;
 	export let data;
+
 	const {
 		room: { roomMembers, title, id: roomId }
 	} = data;
 
 	const messageStore = writable(roomMembers);
 	const user = getContext<Writable<string>>('user');
+	const userStatus = writable('');
 
 	onMount(() => {
 		const source = new EventSource(`${$page.url}/activity`, {
@@ -30,19 +32,61 @@
 			source.close();
 		};
 	});
+
+	let formElem;
+	function handleSubmit(e) {
+		console.log('submitted');
+	}
+
+	function handleChange() {
+		formElem.requestSubmit();
+	}
+
+	// make this better
+	let optionsMap = new Map<string, number>([
+		['point', 0],
+		['response', 1],
+		['poi', 2]
+	]);
 </script>
 
 <h1>{title}</h1>
 
-<form method="post" use:enhance>
+<form
+	method="post"
+	bind:this={formElem}
+	on:submit|preventDefault={handleSubmit}
+	use:enhance={({ formElement }) => {
+		return async ({ update }) => {
+			//@ts-ignore
+			formElement.children[optionsMap.get($userStatus)].setAttribute('checked', 'true');
+			await update();
+		};
+	}}
+>
+	<!-- must be on top for child index -->
+	<input type="checkbox" on:change={handleChange} value="point" name="status" />
+	<input type="checkbox" on:change={handleChange} value="response" name="status" />
+	<input type="checkbox" on:change={handleChange} value="poi" name="status" />
+	<input type="hidden" name="room" value={data.room.id} />
+	<input type="hidden" name="name" value={$user} />
+	<input type="text" name="status" value="response" />
 	{#if form?.error}
 		<p class="error" id="error">{form.error}</p>
 	{/if}
-	<input type="hidden" name="room" value={data.room.id} />
-	<input type="hidden" name="name" value={$user} />
-	<input type="submit" value="poi" name="status" />
-	<input type="submit" value="point" name="status" />
 </form>
+
+<button
+	on:click={() => {
+		userStatus.set('poi');
+	}}>Set POI</button
+>
+
+<button
+	on:click={() => {
+		userStatus.set('point');
+	}}>Set point</button
+>
 
 <div class="msg_box">
 	{#if $messageStore.size > 0}
