@@ -1,5 +1,5 @@
-import type { IMessage } from "$lib/schemas";
+import type { IMember } from '$lib/schemas';
 
-const chats = new Set<IMessage>();
+const members = new Map<string, IMember>();
 
-export default chats;
+export default members;

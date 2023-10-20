@@ -1,19 +1,17 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const Message = z.object({
-    id: z.string(),
-    created_at: z.number(),
-    user: z.string(),
-    text: z.string().min(1, "A message is required."),
-    room: z.enum(["room1", "room2"])
+export const MemberInfo = z.object({
+	set_at: z.number(),
+	name: z.string(),
+	status: z.string().regex(/^point$|^response$|^poi$/, 'Not a valid option.'),
+	room: z.enum(['council'])
 });
 
-export const MessageSubmission = Message.omit({ created_at: true, id: true });
+export const MessageSubmission = MemberInfo.omit({ set_at: true, id: true });
 
-export type IMessage = z.infer<typeof Message>;
+export type IMember = z.infer<typeof MemberInfo>;
 
 export const SSEvents = {
-    room1: "room1_chat_sent",
-    room2: "room2_chat_sent",
-    general: "chat_sent"
-}
+	council: 'council_Chat_set',
+	general: 'chat_sent'
+};
