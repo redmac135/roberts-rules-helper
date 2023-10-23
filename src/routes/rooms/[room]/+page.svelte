@@ -1,23 +1,28 @@
 <script lang="ts">
-	import { getContext, onMount } from 'svelte';
-	import { writable, type Writable } from 'svelte/store';
+	import { onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import type { ActionData } from './$types';
 	import { SSEvents } from '$lib/schemas';
+	import { v4 as uuid } from 'uuid';
 
 	export let form: ActionData;
 	export let data;
+
+	import MandatoryModal from '$lib/components/MandatoryModal.svelte';
 
 	const {
 		room: { roomMembers, title, id: roomId }
 	} = data;
 
 	const messageStore = writable(roomMembers);
-	const user = getContext<Writable<string>>('user');
-	const userStatus = writable('');
+	const user = writable<string>();
+	const userStatus = writable('standby');
 
 	onMount(() => {
+		showModal = true;
+		uid = 'tmp-' + uuid();
 		const source = new EventSource(`${$page.url}/activity`, {
 			withCredentials: false
 		});
@@ -33,60 +38,107 @@
 		};
 	});
 
-	let formElem;
-	function handleSubmit(e) {
+	let formElem: HTMLFormElement;
+	function handleSubmit(e: Event) {
 		console.log('submitted');
-	}
-
-	function handleChange() {
-		formElem.requestSubmit();
 	}
 
 	// make this better
 	let optionsMap = new Map<string, number>([
 		['point', 0],
 		['response', 1],
-		['poi', 2]
+		['poi', 2],
+		['standby', 99]
 	]);
+
+	let choices = [
+		{ label: 'Point', value: 'point' },
+		{ label: 'Response', value: 'response' },
+		{ label: 'POI', value: 'poi' }
+	];
+
+	let selectedValue = 'standby';
+
+	function toggleOption(value) {
+		if (selectedValue === value) {
+			selectedValue = 'standby';
+		} else {
+			selectedValue = value;
+		}
+		formElem.requestSubmit();
+	}
+
+	// Modal and name logic
+	let uid: string;
+	let showModal: Boolean;
+	let dialog: HTMLDialogElement;
+	$: user.set(uid);
+
+	function submitModal(e: SubmitEvent) {
+		const formData = new FormData(e.target);
+		let name: string | undefined = formData.get('name')?.toString();
+		if (name === undefined) return;
+		uid = name;
+		dialog.close();
+	}
 </script>
+
+<header class="header">
+	<p>Posting as: <span>{$user?.toString() ?? ''}</span></p>
+	<button
+		on:click={() => {
+			showModal = true;
+		}}>change name</button
+	>
+	<a href="/">Home</a>
+</header>
+
+<MandatoryModal bind:showModal bind:dialog>
+	<form method="post" action="?/changename" on:submit|preventDefault={submitModal}>
+		<input type="hidden" name="previous" value={$user} />
+		<input type="hidden" name="status" value={$userStatus} />
+		<input type="text" name="name" />
+		<button type="submit">Set Name</button>
+	</form>
+</MandatoryModal>
 
 <h1>{title}</h1>
 
 <form
 	method="post"
+	action="?/setstatus"
 	bind:this={formElem}
 	on:submit|preventDefault={handleSubmit}
-	use:enhance={({ formElement }) => {
+	use:enhance={({ formElement, formData }) => {
+		formData.set('status', selectedValue);
+		console.log(formData.get('status'));
 		return async ({ update }) => {
-			//@ts-ignore
-			formElement.children[optionsMap.get($userStatus)].setAttribute('checked', 'true');
+			if (optionsMap.get($userStatus) == 99) {
+				//@ts-ignore
+				formElement.children[optionsMap.get($userStatus)].setAttribute('checked', 'true');
+			}
 			await update();
 		};
 	}}
 >
 	<!-- must be on top for child index -->
-	<input type="checkbox" on:change={handleChange} value="point" name="status" />
-	<input type="checkbox" on:change={handleChange} value="response" name="status" />
-	<input type="checkbox" on:change={handleChange} value="poi" name="status" />
+	{#each choices as choice}
+		<label>
+			<input
+				type="radio"
+				bind:group={selectedValue}
+				value={choice.value}
+				on:click={() => toggleOption(choice.value)}
+			/>
+			{choice.label}
+		</label>
+	{/each}
 	<input type="hidden" name="room" value={data.room.id} />
 	<input type="hidden" name="name" value={$user} />
-	<input type="text" name="status" value="response" />
 	{#if form?.error}
 		<p class="error" id="error">{form.error}</p>
 	{/if}
 </form>
-
-<button
-	on:click={() => {
-		userStatus.set('poi');
-	}}>Set POI</button
->
-
-<button
-	on:click={() => {
-		userStatus.set('point');
-	}}>Set point</button
->
 
 <div class="msg_box">
 	{#if $messageStore.size > 0}
