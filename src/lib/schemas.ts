@@ -7,12 +7,14 @@ export const MemberInfo = z.object({
 	room: z.enum(['council'])
 });
 
-export const MessageSubmission = MemberInfo.omit({ set_at: true, id: true });
+export const MessageSubmission = MemberInfo.omit({ set_at: true });
 export const NameChangeSubmission = MemberInfo.omit({ set_at: true }).extend({
 	previous: z.string()
 });
 
 export type IMember = z.infer<typeof MemberInfo>;
+const MemberUpdateMessage = MemberInfo.extend({ type: z.enum(['set', 'delete']) });
+export type MemberUpdateMessage = z.infer<typeof MemberUpdateMessage>;
 
 export const SSEvents = {
 	council: 'council_chat_set',

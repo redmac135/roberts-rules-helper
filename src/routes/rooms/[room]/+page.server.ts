@@ -4,7 +4,8 @@ import {
 	MessageSubmission,
 	NameChangeSubmission,
 	SSEvents,
-	type IMember
+	type IMember,
+	type MemberUpdateMessage
 } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
@@ -36,7 +37,7 @@ export const actions = {
 				name: formData.get('name')
 			};
 			const parsed = MessageSubmission.parse(chatObj);
-			const message: IMember = { set_at: Date.now(), ...parsed };
+			const message: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
 
 			members.set(parsed.name, message);
 
@@ -53,7 +54,7 @@ export const actions = {
 			return fail(500, { error: 'An unexpected error occurred.' });
 		}
 	},
-	delete: async ({ request }) => {
+	changename: async ({ request }) => {
 		try {
 			const formData = await request.formData();
 			const chatObj = {
@@ -63,17 +64,27 @@ export const actions = {
 				status: formData.get('status')
 			};
 			const parsed = NameChangeSubmission.parse(chatObj);
-			const message: IMember = { set_at: Date.now(), ...parsed };
+			const messageSet: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
 
 			let previousStatus: string | undefined = members.get(parsed.previous)?.name;
 			if (previousStatus !== undefined) {
 				members.delete(parsed.previous);
 			}
-			members.set(parsed.name, message);
+			// members.set(parsed.name, messageSet);
 
-			const roomEvent = SSEvents[message.room];
-			chatEmitter.emit(SSEvents.general, message);
-			chatEmitter.emit(roomEvent, message);
+			const roomEvent = SSEvents[messageSet.room];
+			// chatEmitter.emit(SSEvents.general, messageSet);
+			// chatEmitter.emit(roomEvent, messageSet);
+
+			const messageDelete: MemberUpdateMessage = {
+				set_at: Date.now(),
+				type: 'delete',
+				name: parsed.previous,
+				room: parsed.room,
+				status: parsed.status
+			};
+			chatEmitter.emit(roomEvent, messageDelete);
+			chatEmitter.emit(roomEvent, messageSet);
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));
@@ -81,7 +92,7 @@ export const actions = {
 					return fail(400, { error: textError.message });
 				}
 			}
-			return fail(500, { error: 'An unexpected error occurred.' });
+			return fail(500, { error: 'An unexpected error occurred.' }); // TODO: make work
 		}
 	}
 } satisfies Actions;

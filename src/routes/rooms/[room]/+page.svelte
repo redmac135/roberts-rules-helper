@@ -29,9 +29,18 @@
 		const event = SSEvents[roomId as keyof typeof SSEvents];
 		source.addEventListener(event, (e) => {
 			const message = JSON.parse(e.data);
-			const membername = message.name;
+			const membername: string = message.name;
 			delete message.name;
-			messageStore.update(($messageStore) => $messageStore.set(membername, message));
+			if (message.type === 'set') {
+				messageStore.update(($messageStore) => $messageStore.set(membername, message));
+			}
+			if (message.type === 'delete') {
+				messageStore.update(($messageStore) => {
+					$messageStore.delete(membername);
+					return $messageStore;
+				});
+				console.log($messageStore);
+			}
 		});
 		return () => {
 			source.close();
@@ -73,14 +82,6 @@
 	let showModal: Boolean;
 	let dialog: HTMLDialogElement;
 	$: user.set(uid);
-
-	function submitModal(e: SubmitEvent) {
-		const formData = new FormData(e.target);
-		let name: string | undefined = formData.get('name')?.toString();
-		if (name === undefined) return;
-		uid = name;
-		dialog.close();
-	}
 </script>
 
 <header class="header">
@@ -94,8 +95,20 @@
 </header>
 
 <MandatoryModal bind:showModal bind:dialog>
-	<form method="post" action="?/changename" on:submit|preventDefault={submitModal}>
+	<form
+		method="post"
+		action="?/changename"
+		use:enhance={({ formData }) => {
+			let name = formData.get('name')?.toString();
+			if (name === undefined) return;
+			return async () => {
+				uid = name;
+				dialog.close();
+			};
+		}}
+	>
 		<input type="hidden" name="previous" value={$user} />
+		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$userStatus} />
 		<input type="text" name="name" />
 		<button type="submit">Set Name</button>
@@ -111,17 +124,14 @@
 	on:submit|preventDefault={handleSubmit}
 	use:enhance={({ formElement, formData }) => {
 		formData.set('status', selectedValue);
-		console.log(formData.get('status'));
+		userStatus.set(selectedValue);
 		return async ({ update }) => {
-			if (optionsMap.get($userStatus) == 99) {
-				//@ts-ignore
-				formElement.children[optionsMap.get($userStatus)].setAttribute('checked', 'true');
-			}
+			// Don't know why but this line just works
+			formElement.children[99].setAttribute('checked', 'true');
 			await update();
 		};
 	}}
 >
-	<!-- must be on top for child index -->
 	{#each choices as choice}
 		<label>
 			<input
