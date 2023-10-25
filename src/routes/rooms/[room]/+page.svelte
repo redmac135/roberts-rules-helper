@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
 	import type { ActionData } from './$types';
 	import { SSEvents } from '$lib/schemas';
 	import { v4 as uuid } from 'uuid';
@@ -23,7 +22,7 @@
 	onMount(() => {
 		showModal = true;
 		uid = 'tmp-' + uuid();
-		const source = new EventSource(`${$page.url}/activity`, {
+		const source = new EventSource(`/rooms/${roomId}/activity`, {
 			withCredentials: false
 		});
 		const event = SSEvents[roomId as keyof typeof SSEvents];
@@ -153,7 +152,9 @@
 <div class="msg_box">
 	{#if $messageStore.size > 0}
 		<ul>
-			{#each [...$messageStore] as msg}
+			{#each [...$messageStore].sort((a, b) => {
+				return b[1].set_at - a[1].set_at;
+			}) as msg}
 				<li>
 					<div class="msg">
 						<span

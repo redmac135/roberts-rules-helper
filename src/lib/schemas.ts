@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// TODO: as this is used in the map name => info, name is actually undefined for most of the time, should be omited
 export const MemberInfo = z.object({
 	set_at: z.number(),
 	name: z.string(),
