@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { SSEvents } from '$lib/schemas';
+	import StatusList from '$lib/components/StatusList.svelte';
+	import StatusListItem from '$lib/components/StatusListItem.svelte';
 
 	export let data;
 	const {
@@ -36,8 +38,7 @@
 </script>
 
 <div class="list-container">
-	<div class="list-item poi">
-		<h2>POI</h2>
+	<StatusList title="poi">
 		{#if [...$messageStore].filter((member) => member[1].status == 'poi').length > 0}
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'poi')
@@ -45,28 +46,14 @@
 					return b[1].set_at - a[1].set_at;
 				}) as msg}
 				<li>
-					<div class="msg">
-						<span
-							><span style="font-weight: bold;"
-								>{msg[0].toString()}
-								<p>{msg[1].status}</p>
-								<small
-									>{new Intl.DateTimeFormat('en-US', {
-										timeStyle: 'short',
-										dateStyle: 'short'
-									}).format(new Date(msg[1].set_at))}</small
-								>
-							</span></span
-						>
-					</div>
+					<StatusListItem status="poi">{msg[0]}</StatusListItem>
 				</li>
 			{/each}
 		{:else}
-			<p>No POIs</p>
+			<p>none</p>
 		{/if}
-	</div>
-	<div class="list-item response">
-		<h2>Response</h2>
+	</StatusList>
+	<StatusList title="response">
 		{#if [...$messageStore].filter((member) => member[1].status == 'response').length > 0}
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'response')
@@ -74,58 +61,36 @@
 					return b[1].set_at - a[1].set_at;
 				}) as msg}
 				<li>
-					<div class="msg">
-						<span
-							><span style="font-weight: bold;"
-								>{msg[0].toString()}
-								<p>{msg[1].status}</p>
-								<small
-									>{new Intl.DateTimeFormat('en-US', {
-										timeStyle: 'short',
-										dateStyle: 'short'
-									}).format(new Date(msg[1].set_at))}</small
-								>
-							</span></span
-						>
-					</div>
+					<StatusListItem status="response">{msg[0]}</StatusListItem>
 				</li>
 			{/each}
 		{:else}
-			<p>No Response</p>
+			<p>none</p>
 		{/if}
-	</div>
-	<div class="list-item point">
-		<h2>Point</h2>
+	</StatusList>
+	<StatusList title="point">
 		{#if [...$messageStore].filter((member) => member[1].status == 'point').length > 0}
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'point')
 				.sort((a, b) => {
 					return b[1].set_at - a[1].set_at;
 				}) as msg}
-				<li>
-					<div class="msg">
-						<span
-							><span style="font-weight: bold;"
-								>{msg[0].toString()}
-								<p>{msg[1].status}</p>
-								<small
-									>{new Intl.DateTimeFormat('en-US', {
-										timeStyle: 'short',
-										dateStyle: 'short'
-									}).format(new Date(msg[1].set_at))}</small
-								>
-							</span></span
-						>
-					</div>
-				</li>
+				<button>
+					<StatusListItem status="point">{msg[0]}</StatusListItem>
+				</button>
 			{/each}
 		{:else}
-			<p>No Points</p>
+			<p>none</p>
 		{/if}
-	</div>
+	</StatusList>
 </div>
 
 <style>
+	button {
+		outline: none;
+		border: none;
+	}
+
 	.list-container {
 		display: flex;
 	}
