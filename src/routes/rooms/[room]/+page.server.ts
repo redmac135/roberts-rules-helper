@@ -69,11 +69,8 @@ export const actions = {
 			if (previousStatus !== undefined) {
 				members.delete(parsed.previous);
 			}
-			// members.set(parsed.name, messageSet);
 
 			const roomEvent = SSEvents[messageSet.room];
-			// chatEmitter.emit(SSEvents.general, messageSet);
-			// chatEmitter.emit(roomEvent, messageSet);
 
 			const messageDelete: MemberUpdateMessage = {
 				set_at: Date.now(),
