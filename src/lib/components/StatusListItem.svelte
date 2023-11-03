@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { IMember } from '$lib/schemas';
 
+	export let name: IMember['name'];
 	export let status: IMember['status'];
+	export let room: IMember['room'];
 
 	const colorMap = new Map([
 		['poi', 'red'],
@@ -11,9 +13,22 @@
 	]);
 </script>
 
-<div class="wrapper" style="background-color: {colorMap.get(status)};">
-	<slot />
-</div>
+<a
+	href="/"
+	on:click|preventDefault={() => {
+		fetch(`/rooms/${room}/speaker/api`, {
+			method: 'post',
+			body: JSON.stringify({
+				name: name,
+				room: room
+			})
+		});
+	}}
+>
+	<div class="wrapper" style="background-color: {colorMap.get(status)};">
+		{name}
+	</div>
+</a>
 
 <style>
 	.wrapper {
