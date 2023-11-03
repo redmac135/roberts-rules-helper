@@ -47,9 +47,6 @@
 	});
 
 	let formElem: HTMLFormElement;
-	function handleSubmit(e: Event) {
-		console.log('submitted');
-	}
 
 	// make this better
 	let optionsMap = new Map<string, number>([

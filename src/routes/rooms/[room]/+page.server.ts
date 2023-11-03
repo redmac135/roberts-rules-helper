@@ -4,7 +4,6 @@ import {
 	MessageSubmission,
 	NameChangeSubmission,
 	SSEvents,
-	type IMember,
 	type MemberUpdateMessage
 } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
