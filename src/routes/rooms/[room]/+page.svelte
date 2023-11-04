@@ -13,6 +13,7 @@
 	import MandatoryModal from '$lib/components/MandatoryModal.svelte';
 	import StatusLists from '$lib/components/StatusLists.svelte';
 	import StatusOptions from '$lib/components/StatusOptions.svelte';
+	import StatusBar from '$lib/components/StatusBar.svelte';
 
 	let uid: string;
 	if (browser) {
@@ -63,9 +64,9 @@
 	let formElem: HTMLFormElement;
 
 	let choices = [
-		{ label: 'Point', value: 'point' },
+		{ label: 'POI', value: 'poi' },
 		{ label: 'Response', value: 'response' },
-		{ label: 'POI', value: 'poi' }
+		{ label: 'Point', value: 'point' }
 	];
 
 	let selectedValue = 'standby';
@@ -80,20 +81,12 @@
 	}
 
 	// Modal and name logic
-	let showModal: Boolean;
+	let showModal: boolean;
 	let dialog: HTMLDialogElement;
 	$: user.set(uid);
 </script>
 
-<header class="header">
-	<p>Posting as: <span>{$user?.toString() ?? ''}</span></p>
-	<button
-		on:click={() => {
-			showModal = true;
-		}}>change name</button
-	>
-	<a href="/">Home</a>
-</header>
+<StatusBar name={$user?.toString()} status={$userStatus} bind:showModal />
 
 <MandatoryModal bind:showModal bind:dialog>
 	<form
@@ -116,7 +109,7 @@
 	</form>
 </MandatoryModal>
 
-<h1>{title}</h1>
+<h1>{title.toUpperCase()}</h1>
 
 <form
 	method="post"
@@ -141,74 +134,19 @@
 	{/if}
 </form>
 
-<div class="msg_box">
-	{#if $messageStore.size > 0}
-		<ul>
-			{#each [...$messageStore].sort((a, b) => {
-				return b[1].set_at - a[1].set_at;
-			}) as msg}
-				<li>
-					<div class="msg">
-						<span
-							><span style="font-weight: bold;"
-								>{msg[0].toString()}
-								<p>{msg[1].status}</p>
-								<small
-									>{new Intl.DateTimeFormat('en-US', {
-										timeStyle: 'short',
-										dateStyle: 'short'
-									}).format(new Date(msg[1].set_at))}</small
-								>
-							</span></span
-						>
-					</div>
-				</li>
-			{/each}
-		</ul>
-	{:else}
-		<p>No messages.</p>
-	{/if}
-</div>
 <StatusLists {messageStore} />
 
 <style>
-	.msg_box {
-		margin-top: 8px;
-		padding: 1rem;
-		background-color: rgba(157, 210, 235, 0.25);
-		border-radius: 4px;
-		width: 90%;
-	}
-
-	.msg_box ul {
-		display: grid;
-		gap: 4px;
-	}
-
-	.msg_box li {
-		list-style: none;
-	}
-	.msg {
-		background-color: rgba(255, 255, 255, 0.5);
-		border-radius: 4px;
-		padding: 0.5rem;
-	}
-	.msg span {
-		font-size: 1rem;
-	}
-
 	.error {
 		color: red;
 		font-weight: bold;
 		font-size: 1rem;
 	}
 
-	small {
-		font-size: 0.75rem;
-	}
-
 	h1 {
 		padding: 1rem;
+		text-align: center;
+		color: white;
 	}
 
 	form {
@@ -216,11 +154,5 @@
 		place-items: center;
 		gap: 1rem;
 		width: 100%;
-	}
-
-	@media screen and (min-width: 640px) {
-		.msg_box {
-			width: 75%;
-		}
 	}
 </style>

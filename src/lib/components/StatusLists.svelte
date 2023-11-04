@@ -57,5 +57,6 @@
 <style>
 	.list-container {
 		display: flex;
+		justify-content: center;
 	}
 </style>

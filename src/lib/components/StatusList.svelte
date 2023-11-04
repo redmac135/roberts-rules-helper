@@ -10,6 +10,7 @@
 <style>
 	ol {
 		background-color: lightgray;
+		border-radius: 0.3rem;
 		list-style: none;
 		text-align: center;
 		width: 10rem;

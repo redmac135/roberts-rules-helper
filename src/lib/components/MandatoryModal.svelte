@@ -9,10 +9,7 @@
 <dialog bind:this={dialog} on:close={() => (showModal = false)}>
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click|stopPropagation>
-		<slot name="header" />
-		<hr />
 		<slot />
-		<hr />
 	</div>
 </dialog>
 

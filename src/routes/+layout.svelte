@@ -11,7 +11,7 @@
 	}
 
 	:global(html, body) {
-		background-color: aliceblue;
+		background-color: rgb(39, 39, 39);
 		color: rgb(0, 15, 49);
 	}
 

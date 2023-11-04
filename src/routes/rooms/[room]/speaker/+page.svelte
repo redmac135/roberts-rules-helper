@@ -3,6 +3,7 @@
 	import { writable } from 'svelte/store';
 	import { SSEvents } from '$lib/schemas';
 	import StatusLists from '$lib/components/StatusLists.svelte';
+	import StatusBar from '$lib/components/StatusBar.svelte';
 
 	export let data;
 	const {
@@ -35,4 +36,5 @@
 	});
 </script>
 
-<StatusLists {messageStore} />
+<StatusBar name={'SPEAKER'} status={''} />
+<StatusLists {messageStore} clickable={true} />

@@ -35,8 +35,8 @@
 		align-items: center;
 		justify-content: center;
 		margin: 0.5rem;
-		width: 8rem;
-		height: 8rem;
+		width: 6rem;
+		height: 6rem;
 		border-radius: 0.5rem;
 		opacity: 1;
 		transition: scale 200ms, opacity 200ms;
@@ -49,5 +49,12 @@
 
 	input {
 		display: none;
+	}
+
+	@media (min-width: 600px) {
+		label > div {
+			width: 8rem;
+			height: 8rem;
+		}
 	}
 </style>
