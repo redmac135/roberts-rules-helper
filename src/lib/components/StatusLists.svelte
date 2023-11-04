@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let messageStore;
+	export let clickable: boolean = false;
 
 	import StatusList from './StatusList.svelte';
 	import StatusListItem from './StatusListItem.svelte';
@@ -14,7 +15,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="poi" name={msg[0]} room={msg[1].room} />
+					<StatusListItem status="poi" name={msg[0]} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}
@@ -29,7 +30,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="response" name={msg[0]} room={msg[1].room} />
+					<StatusListItem status="response" name={msg[0]} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}
@@ -44,7 +45,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="point" name={msg[0]} room={msg[1].room} />
+					<StatusListItem status="point" name={msg[0]} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}

@@ -5,20 +5,22 @@
 	export let name: IMember['name'];
 	export let status: IMember['status'];
 	export let room: IMember['room'];
+	export let clickable: boolean;
+
+	function setStandby() {
+		if (clickable) {
+			fetch(`/rooms/${room}/speaker/api`, {
+				method: 'post',
+				body: JSON.stringify({
+					name: name,
+					room: room
+				})
+			});
+		}
+	}
 </script>
 
-<a
-	href="/"
-	on:click|preventDefault={() => {
-		fetch(`/rooms/${room}/speaker/api`, {
-			method: 'post',
-			body: JSON.stringify({
-				name: name,
-				room: room
-			})
-		});
-	}}
->
+<a href="/" on:click|preventDefault={setStandby}>
 	<div class="wrapper" style="background-color: {colorMap.get(status)};">
 		{name}
 	</div>
@@ -35,5 +37,9 @@
 		padding: 0.5rem;
 		margin-top: 0.25rem;
 		margin-bottom: 0.25rem;
+	}
+
+	a {
+		text-decoration: none;
 	}
 </style>
