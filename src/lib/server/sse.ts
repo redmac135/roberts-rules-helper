@@ -1,4 +1,4 @@
-import type { EventEmitter } from 'node:events';
+import type { EventEmitter } from 'events';
 
 export function createSSE(retry = 0) {
 	const { readable, writable } = new TransformStream({
