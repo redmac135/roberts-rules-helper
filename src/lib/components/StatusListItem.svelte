@@ -1,16 +1,10 @@
 <script lang="ts">
 	import type { IMember } from '$lib/schemas';
+	import { colorMap } from '$lib';
 
 	export let name: IMember['name'];
 	export let status: IMember['status'];
 	export let room: IMember['room'];
-
-	const colorMap = new Map([
-		['poi', 'red'],
-		['response', 'lightgreen'],
-		['point', 'lightblue'],
-		['standby', 'gray']
-	]);
 </script>
 
 <a

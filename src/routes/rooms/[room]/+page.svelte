@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
@@ -10,6 +11,19 @@
 	export let data;
 
 	import MandatoryModal from '$lib/components/MandatoryModal.svelte';
+	import StatusLists from '$lib/components/StatusLists.svelte';
+	import StatusOptions from '$lib/components/StatusOptions.svelte';
+
+	let uid: string;
+	if (browser) {
+		const userId = localStorage.getItem('userid');
+		if (userId) {
+			uid = userId;
+		} else {
+			uid = 'tmp-' + uuid();
+			localStorage.setItem('userid', uid);
+		}
+	}
 
 	const {
 		room: { roomMembers, title, id: roomId }
@@ -20,8 +34,6 @@
 	const userStatus = writable('standby');
 
 	onMount(() => {
-		showModal = true;
-		uid = 'tmp-' + uuid();
 		const source = new EventSource(`/rooms/${roomId}/activity`, {
 			withCredentials: false
 		});
@@ -32,13 +44,15 @@
 			delete message.name;
 			if (message.type === 'set') {
 				messageStore.update(($messageStore) => $messageStore.set(membername, message));
+				if (membername === $user?.toString()) {
+					selectedValue = message.status;
+				}
 			}
 			if (message.type === 'delete') {
 				messageStore.update(($messageStore) => {
 					$messageStore.delete(membername);
 					return $messageStore;
 				});
-				console.log($messageStore);
 			}
 		});
 		return () => {
@@ -47,14 +61,6 @@
 	});
 
 	let formElem: HTMLFormElement;
-
-	// make this better
-	let optionsMap = new Map<string, number>([
-		['point', 0],
-		['response', 1],
-		['poi', 2],
-		['standby', 99]
-	]);
 
 	let choices = [
 		{ label: 'Point', value: 'point' },
@@ -74,7 +80,6 @@
 	}
 
 	// Modal and name logic
-	let uid: string;
 	let showModal: Boolean;
 	let dialog: HTMLDialogElement;
 	$: user.set(uid);
@@ -117,7 +122,7 @@
 	method="post"
 	action="?/setstatus"
 	bind:this={formElem}
-	on:submit|preventDefault={handleSubmit}
+	on:submit|preventDefault
 	use:enhance={({ formElement, formData }) => {
 		formData.set('status', selectedValue);
 		userStatus.set(selectedValue);
@@ -128,17 +133,7 @@
 		};
 	}}
 >
-	{#each choices as choice}
-		<label>
-			<input
-				type="radio"
-				bind:group={selectedValue}
-				value={choice.value}
-				on:click={() => toggleOption(choice.value)}
-			/>
-			{choice.label}
-		</label>
-	{/each}
+	<StatusOptions {choices} bind:selectedValue {toggleOption} />
 	<input type="hidden" name="room" value={data.room.id} />
 	<input type="hidden" name="name" value={$user} />
 	{#if form?.error}
@@ -174,6 +169,7 @@
 		<p>No messages.</p>
 	{/if}
 </div>
+<StatusLists {messageStore} />
 
 <style>
 	.msg_box {
