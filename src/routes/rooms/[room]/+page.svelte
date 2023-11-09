@@ -71,7 +71,7 @@
 
 	let selectedValue = 'standby';
 
-	function toggleOption(value) {
+	function toggleOption(value: 'poi' | 'point' | 'response' | 'standby') {
 		if (selectedValue === value) {
 			selectedValue = 'standby';
 		} else {
@@ -94,10 +94,14 @@
 		action="?/changename"
 		use:enhance={({ formData }) => {
 			let name = formData.get('name')?.toString();
-			if (name === undefined) return;
-			return async () => {
-				uid = name;
-				dialog.close();
+			if (name === undefined) return; // TODO: this function should raise error
+			return ({ result, update }) => {
+				if (result.type === 'success') {
+					uid = name;
+					dialog.close();
+				} else {
+					update();
+				}
 			};
 		}}
 	>
@@ -105,6 +109,9 @@
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$userStatus} />
 		<input type="text" name="name" />
+		{#if form?.error}
+			<p class="error" id="error">{form.error}</p>
+		{/if}
 		<button type="submit">Set Name</button>
 	</form>
 </MandatoryModal>

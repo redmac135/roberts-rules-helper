@@ -8,7 +8,7 @@ import {
 } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
-import { error, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
 
 export const load = (async ({ params }) => {
@@ -62,6 +62,10 @@ export const actions = {
 				name: formData.get('name'),
 				status: formData.get('status')
 			};
+			// TODO: fix this bandaid solution to zod not throwing error when name.length == 0
+			if (chatObj.name?.toString().length === 0) {
+				return fail(400, { error: 'Name cannot be blank.' });
+			}
 			const parsed = NameChangeSubmission.parse(chatObj);
 			const messageSet: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
 
