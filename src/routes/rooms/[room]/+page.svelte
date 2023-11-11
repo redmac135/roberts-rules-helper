@@ -106,11 +106,6 @@
 
 <StatusBar name={$user?.name} status={$user.status} bind:showModal />
 
-<div style="color:white">
-	Name: {$user.name} <br />
-	Uid: {$user.uid}
-</div>
-
 <MandatoryModal bind:showModal bind:dialog>
 	<form
 		method="post"
