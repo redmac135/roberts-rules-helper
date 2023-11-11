@@ -16,13 +16,23 @@
 	import StatusBar from '$lib/components/StatusBar.svelte';
 
 	let uid: string;
+	let name: string;
 	if (browser) {
-		const userId = localStorage.getItem('userid');
-		if (userId) {
-			uid = userId;
+		const userPreferedName = localStorage.getItem('user-name');
+		const userPrevuid = localStorage.getItem('useruid');
+		console.log(userPrevuid);
+		if (userPrevuid) {
+			uid = userPrevuid;
 		} else {
-			uid = 'tmp-' + uuid();
-			localStorage.setItem('userid', uid);
+			uid = uuid();
+			// TODO: set an expiry on this local storage and make sure that it's room specific
+			localStorage.setItem('useruid', uid);
+		}
+		if (userPreferedName) {
+			name = userPreferedName;
+		} else {
+			name = 'tmp-' + uid;
+			localStorage.setItem('user-name', name);
 		}
 	}
 
@@ -30,9 +40,14 @@
 		room: { roomMembers, title, id: roomId }
 	} = data;
 
+	type UserInfo = {
+		uid: string;
+		name: string;
+		status: string;
+	};
+
 	const messageStore = writable(roomMembers);
-	const user = writable<string>();
-	const userStatus = writable('standby');
+	const user = writable<UserInfo>({ uid: uid, name: name, status: 'standby' });
 
 	onMount(() => {
 		const source = new EventSource(`/rooms/${roomId}/activity`, {
@@ -40,19 +55,22 @@
 		});
 		const event = SSEvents[roomId as keyof typeof SSEvents];
 		source.addEventListener(event, (e) => {
-			const message = JSON.parse(e.data);
-			const membername: string = message.name;
-			delete message.name;
-			if (message.type === 'set') {
-				messageStore.update(($messageStore) => $messageStore.set(membername, message));
-				if (membername === $user?.toString()) {
-					selectedValue = message.status;
+			let message = JSON.parse(e.data);
+			if (message[1].type === 'set') {
+				messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
+				// if it's ourselves -> update self status
+				if (message[0] === $user.uid) {
+					selectedValue = message[1].status;
 				}
 			}
-			if (message.type === 'delete') {
+			if (message[1].type === 'changename') {
 				messageStore.update(($messageStore) => {
-					$messageStore.delete(membername);
-					return $messageStore;
+					let obj = $messageStore.get(message[0]);
+					if (obj === undefined) {
+						return $messageStore;
+					}
+					obj.name = message[1].name;
+					return $messageStore.set(message[0], obj);
 				});
 			}
 		});
@@ -83,21 +101,28 @@
 	// Modal and name logic
 	let showModal: boolean;
 	let dialog: HTMLDialogElement;
-	$: user.set(uid);
+	$: user.update((obj) => ({ uid: obj.uid, name: name, status: obj.status }));
 </script>
 
-<StatusBar name={$user?.toString()} status={$userStatus} bind:showModal />
+<StatusBar name={$user?.name} status={$user.status} bind:showModal />
+
+<div style="color:white">
+	Name: {$user.name} <br />
+	Uid: {$user.uid}
+</div>
 
 <MandatoryModal bind:showModal bind:dialog>
 	<form
 		method="post"
 		action="?/changename"
 		use:enhance={({ formData }) => {
-			let name = formData.get('name')?.toString();
-			if (name === undefined) return; // TODO: this function should raise error
+			let newname = formData.get('name')?.toString();
+			if (newname === undefined) return; // TODO: this function should raise error from zod
 			return ({ result, update }) => {
 				if (result.type === 'success') {
-					uid = name;
+					//@ts-ignore
+					name = newname;
+					localStorage.setItem('user-name', name);
 					dialog.close();
 				} else {
 					update();
@@ -105,9 +130,9 @@
 			};
 		}}
 	>
-		<input type="hidden" name="previous" value={$user} />
+		<input type="hidden" name="useruid" value={$user.uid} />
 		<input type="hidden" name="room" value={data.room.id} />
-		<input type="hidden" name="status" value={$userStatus} />
+		<input type="hidden" name="status" value={$user.status} />
 		<input type="text" name="name" />
 		{#if form?.error}
 			<p class="error" id="error">{form.error}</p>
@@ -125,7 +150,7 @@
 	on:submit|preventDefault
 	use:enhance={({ formElement, formData }) => {
 		formData.set('status', selectedValue);
-		userStatus.set(selectedValue);
+		user.update((obj) => ({ uid: obj.uid, name: name, status: selectedValue }));
 		return async ({ update }) => {
 			// Don't know why but this line just works
 			formElement.children[99].setAttribute('checked', 'true');
@@ -135,7 +160,8 @@
 >
 	<StatusOptions {choices} bind:selectedValue {toggleOption} />
 	<input type="hidden" name="room" value={data.room.id} />
-	<input type="hidden" name="name" value={$user} />
+	<input type="hidden" name="useruid" value={$user.uid} />
+	<input type="hidden" name="name" value={$user.name} />
 	{#if form?.error}
 		<p class="error" id="error">{form.error}</p>
 	{/if}

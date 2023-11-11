@@ -1,5 +1,5 @@
 import members from '$lib/server/state';
-import { MemberInfo, MessageSubmission, SSEvents, type MemberUpdateMessage } from '$lib/schemas';
+import { MemberInfo, StatusSubmission, SSEvents, type MemberUpdateMessage } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
@@ -25,18 +25,28 @@ export const actions = {
 		try {
 			const formData = await request.formData();
 			const chatObj = {
+				useruid: formData.get('useruid'),
+				name: formData.get('name'),
 				status: formData.get('status'),
-				room: formData.get('room'),
-				name: formData.get('name')
+				room: formData.get('room')
 			};
-			const parsed = MessageSubmission.parse(chatObj);
-			const message: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
+			const parsed = StatusSubmission.parse(chatObj);
+			const useruid = parsed.useruid;
+			//@ts-ignore
+			delete parsed.useruid;
+			if (members.get(useruid) === undefined) {
+				members.set(useruid, { set_at: Date.now(), ...parsed });
+			}
+			const message: MemberUpdateMessage = {
+				set_at: Date.now(),
+				type: 'set',
+				...parsed
+			};
 
-			members.set(parsed.name, message);
+			members.set(useruid, message);
 
-			const roomEvent = SSEvents[message.room];
-			chatEmitter.emit(SSEvents.general, message);
-			chatEmitter.emit(roomEvent, message);
+			chatEmitter.emit(SSEvents.general, [useruid, message]);
+			chatEmitter.emit(SSEvents[message.room], [useruid, message]);
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));

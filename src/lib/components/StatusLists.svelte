@@ -15,7 +15,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="poi" name={msg[0]} room={msg[1].room} {clickable} />
+					<StatusListItem status="poi" name={msg[1].name} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}
@@ -30,7 +30,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="response" name={msg[0]} room={msg[1].room} {clickable} />
+					<StatusListItem status="response" name={msg[1].name} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}
@@ -45,7 +45,7 @@
 					return a[1].set_at - b[1].set_at;
 				}) as msg}
 				<li>
-					<StatusListItem status="point" name={msg[0]} room={msg[1].room} {clickable} />
+					<StatusListItem status="point" name={msg[1].name} room={msg[1].room} {clickable} />
 				</li>
 			{/each}
 		{:else}
