@@ -1,4 +1,4 @@
-# roberts-rules-helper
+# Robert's Rules Helper
 
 A helper app used to synchronize the use of Robert's Rules for councils.
 
