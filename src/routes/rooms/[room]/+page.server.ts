@@ -1,10 +1,10 @@
 import members from '$lib/server/state';
 import {
 	MemberInfo,
-	MessageSubmission,
 	NameChangeSubmission,
 	SSEvents,
-	type MemberUpdateMessage
+	type MemberUpdateMessage,
+	StatusSubmission
 } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
@@ -31,18 +31,28 @@ export const actions = {
 		try {
 			const formData = await request.formData();
 			const chatObj = {
+				useruid: formData.get('useruid'),
+				name: formData.get('name'),
 				status: formData.get('status'),
-				room: formData.get('room'),
-				name: formData.get('name')
+				room: formData.get('room')
 			};
-			const parsed = MessageSubmission.parse(chatObj);
-			const message: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
+			const parsed = StatusSubmission.parse(chatObj);
+			const useruid = parsed.useruid;
+			//@ts-ignore
+			delete parsed.useruid;
+			if (members.get(useruid) === undefined) {
+				members.set(useruid, { set_at: Date.now(), ...parsed });
+			}
+			const message: MemberUpdateMessage = {
+				set_at: Date.now(),
+				type: 'set',
+				...parsed
+			};
 
-			members.set(parsed.name, message);
+			members.set(useruid, message);
 
-			const roomEvent = SSEvents[message.room];
-			chatEmitter.emit(SSEvents.general, message);
-			chatEmitter.emit(roomEvent, message);
+			chatEmitter.emit(SSEvents.general, [useruid, message]);
+			chatEmitter.emit(SSEvents[message.room], [useruid, message]);
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));
@@ -57,7 +67,7 @@ export const actions = {
 		try {
 			const formData = await request.formData();
 			const chatObj = {
-				previous: formData.get('previous'),
+				useruid: formData.get('useruid'),
 				room: formData.get('room'),
 				name: formData.get('name'),
 				status: formData.get('status')
@@ -67,24 +77,11 @@ export const actions = {
 				return fail(400, { error: 'Name cannot be blank.' });
 			}
 			const parsed = NameChangeSubmission.parse(chatObj);
-			const messageSet: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
-
-			let previousStatus: string | undefined = members.get(parsed.previous)?.name;
-			if (previousStatus !== undefined) {
-				members.delete(parsed.previous);
-			}
-
-			const roomEvent = SSEvents[messageSet.room];
-
-			const messageDelete: MemberUpdateMessage = {
-				set_at: Date.now(),
-				type: 'delete',
-				name: parsed.previous,
-				room: parsed.room,
-				status: parsed.status
-			};
-			chatEmitter.emit(roomEvent, messageDelete);
-			chatEmitter.emit(roomEvent, messageSet);
+			const newuseruid = parsed.useruid;
+			//@ts-ignore
+			delete parsed.useruid;
+			const newMemberInfo: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
+			chatEmitter.emit(SSEvents[newMemberInfo.room], [newuseruid, newMemberInfo]);
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));

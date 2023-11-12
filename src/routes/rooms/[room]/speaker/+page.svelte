@@ -17,16 +17,18 @@
 		});
 		const event = SSEvents[roomId as keyof typeof SSEvents];
 		source.addEventListener(event, (e) => {
-			const message = JSON.parse(e.data);
-			const membername: string = message.name;
-			delete message.name;
-			if (message.type === 'set') {
-				messageStore.update(($messageStore) => $messageStore.set(membername, message));
+			let message = JSON.parse(e.data);
+			if (message[1].type === 'set') {
+				messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
 			}
-			if (message.type === 'delete') {
+			if (message[1].type === 'changename') {
 				messageStore.update(($messageStore) => {
-					$messageStore.delete(membername);
-					return $messageStore;
+					let obj = $messageStore.get(message[0]);
+					if (obj === undefined) {
+						return $messageStore;
+					}
+					obj.name = message[1].name;
+					return $messageStore.set(message[0], obj);
 				});
 			}
 		});

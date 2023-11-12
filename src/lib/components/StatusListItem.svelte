@@ -2,6 +2,7 @@
 	import type { IMember } from '$lib/schemas';
 	import { colorMap } from '$lib';
 
+	export let uid: string;
 	export let name: IMember['name'];
 	export let status: IMember['status'];
 	export let room: IMember['room'];
@@ -12,6 +13,7 @@
 			fetch(`/rooms/${room}/speaker/api`, {
 				method: 'post',
 				body: JSON.stringify({
+					uid: uid,
 					name: name,
 					room: room
 				})

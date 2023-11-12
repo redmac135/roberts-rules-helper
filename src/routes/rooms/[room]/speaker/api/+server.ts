@@ -1,23 +1,25 @@
-import { MessageSubmission, type MemberUpdateMessage, SSEvents } from '$lib/schemas.js';
+import { StatusSubmission, type MemberUpdateMessage, SSEvents } from '$lib/schemas.js';
 import { chatEmitter } from '$lib/server/emitters.js';
 import members from '$lib/server/state';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request }) {
 	try {
-		const { name, room } = await request.json();
+		const { uid, name, room } = await request.json();
 		const chatObj = {
-			status: 'standby',
+			useruid: uid,
+			name: name,
 			room: room,
-			name: name
+			status: 'standby'
 		};
-		const parsed = MessageSubmission.parse(chatObj);
+		const parsed = StatusSubmission.parse(chatObj);
+		let useruid = parsed.useruid;
+		delete parsed.useruid;
 		const message: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
-		members.set(chatObj.name, message);
+		members.set(useruid, message);
 
-		const roomEvent = SSEvents[message.room];
-		chatEmitter.emit(SSEvents.general, message);
-		chatEmitter.emit(roomEvent, message);
+		chatEmitter.emit(SSEvents.general, [useruid, message]);
+		chatEmitter.emit(SSEvents[message.room], [useruid, message]);
 		return new Response('success', { status: 200 });
 	} catch (error) {
 		console.log(error);
