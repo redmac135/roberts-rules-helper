@@ -2,9 +2,9 @@ name: build + publish
 
 on:
   push:
-    branchs:
-      - master
-  workflow-dispatch:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
