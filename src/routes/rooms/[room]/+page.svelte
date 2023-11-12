@@ -56,11 +56,16 @@
 		const event = SSEvents[roomId as keyof typeof SSEvents];
 		source.addEventListener(event, (e) => {
 			let message = JSON.parse(e.data);
+			console.log(message);
 			if (message[1].type === 'set') {
 				messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
 				// if it's ourselves -> update self status
 				if (message[0] === $user.uid) {
 					selectedValue = message[1].status;
+					user.update(($user) => {
+						$user.name = message[1].name;
+						return $user;
+					});
 				}
 			}
 			if (message[1].type === 'changename') {
