@@ -10,7 +10,7 @@
 	export let form: ActionData;
 	export let data;
 
-	import MandatoryModal from '$lib/components/MandatoryModal.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 	import StatusLists from '$lib/components/StatusLists.svelte';
 	import StatusOptions from '$lib/components/StatusOptions.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';
@@ -103,15 +103,22 @@
 		formElem.requestSubmit();
 	}
 
+	function resetUid() {
+		uid = uuid();
+		localStorage.setItem('useruid', uid);
+	}
+
 	// Modal and name logic
 	let showModal: boolean;
 	let dialog: HTMLDialogElement;
-	$: user.update((obj) => ({ uid: obj.uid, name: name, status: obj.status }));
+	$: user.update((obj) => ({ uid: uid, name: name, status: obj.status }));
 </script>
 
 <StatusBar name={$user?.name} status={$user.status} bind:showModal />
 
-<MandatoryModal bind:showModal bind:dialog>
+<div class="right"><button class="reset" on:click={resetUid}>reset id</button></div>
+
+<Modal bind:showModal bind:dialog>
 	<form
 		method="post"
 		action="?/changename"
@@ -133,13 +140,13 @@
 		<input type="hidden" name="useruid" value={$user.uid} />
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$user.status} />
-		<input type="text" name="name" />
+		<input type="text" name="name" value={$user.name} />
 		{#if form?.error}
 			<p class="error" id="error">{form.error}</p>
 		{/if}
 		<button type="submit">Set Name</button>
 	</form>
-</MandatoryModal>
+</Modal>
 
 <h1>{title.toUpperCase()}</h1>
 
@@ -174,6 +181,22 @@
 		color: red;
 		font-weight: bold;
 		font-size: 1rem;
+	}
+
+	.right {
+		margin: 1rem;
+		display: flex;
+		justify-content: right;
+	}
+
+	button.reset {
+		border: none;
+		background-color: orange;
+		padding-right: 0.5rem;
+		padding-left: 0.5rem;
+		padding-top: 0.25rem;
+		padding-bottom: 0.25rem;
+		border-radius: 0.25rem;
 	}
 
 	h1 {
