@@ -19,6 +19,8 @@ RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY --from=sk-build /usr/src/app/package.json /usr/src/app/package.json
 COPY --from=sk-build /usr/src/app/package-lock.json /usr/src/app/package-lock.json
 
+RUN npm ci --production
+
 COPY --from=sk-build /usr/src/app/build /usr/src/app/build
 
 EXPOSE 3000
