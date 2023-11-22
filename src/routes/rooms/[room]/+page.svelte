@@ -50,6 +50,7 @@
 	const user = writable<UserInfo>({ uid: uid, name: name, status: 'standby' });
 
 	onMount(() => {
+		showModal = true;
 		const source = new EventSource(`/rooms/${roomId}/activity`, {
 			withCredentials: false
 		});
@@ -116,7 +117,7 @@
 
 <StatusBar name={$user?.name} status={$user.status} bind:showModal />
 
-<div class="right"><button class="reset" on:click={resetUid}>reset id</button></div>
+<div class="right"><button class="reset" on:click={resetUid}>Change User</button></div>
 
 <Modal bind:showModal bind:dialog>
 	<form
@@ -140,7 +141,7 @@
 		<input type="hidden" name="useruid" value={$user.uid} />
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$user.status} />
-		<input type="text" name="name" value={$user.name} />
+		<input type="text" on:focus={event => event.target?.select()} name="name" value={$user.name} />
 		{#if form?.error}
 			<p class="error" id="error">{form.error}</p>
 		{/if}
