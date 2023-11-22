@@ -20,7 +20,7 @@
 				value={choice.value}
 				on:click={() => toggleOption(choice.value)}
 			/>
-			<div style="background-color: {colorMap.get(choice.value)};">{choice.label}</div>
+			<div class="noselect" style="background-color: {colorMap.get(choice.value)};">{choice.label}</div>
 		</label>
 	{/each}
 </div>
@@ -49,6 +49,16 @@
 
 	input {
 		display: none;
+	}
+
+	.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 	}
 
 	@media (min-width: 600px) {
