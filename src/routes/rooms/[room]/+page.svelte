@@ -139,7 +139,7 @@
 		<input type="hidden" name="useruid" value={$user.uid} />
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$user.status} />
-		<input type="text" on:focus={event => event.target?.select()} name="name" value={$user.name} />
+		<input type="text" on:focus="{(event: FocusEvent) => (event.target as HTMLInputElement).select()}" name="name" value={$user.name} />
 		{#if form?.error}
 			<p class="error" id="error">{form.error}</p>
 		{/if}
