@@ -20,7 +20,6 @@
 	if (browser) {
 		const userPreferedName = localStorage.getItem('user-name');
 		const userPrevuid = localStorage.getItem('useruid');
-		console.log(userPrevuid);
 		if (userPrevuid) {
 			uid = userPrevuid;
 		} else {
@@ -57,7 +56,6 @@
 		const event = SSEvents[roomId as keyof typeof SSEvents];
 		source.addEventListener(event, (e) => {
 			let message = JSON.parse(e.data);
-			console.log(message);
 			if (message[1].type === 'set') {
 				messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
 				// if it's ourselves -> update self status
