@@ -19,6 +19,8 @@ const MemberUpdateMessage = MemberData.extend({ type: z.enum(['set', 'changename
 export type MemberUpdateMessage = z.infer<typeof MemberUpdateMessage>;
 
 export const SSEvents = {
-	council: 'council_chat_set',
+	council: 'council_update',
 	general: 'chat_sent'
 };
+
+export const HeartBeat = { beat: 'beat' };

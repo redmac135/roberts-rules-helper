@@ -1,6 +1,6 @@
-import members from '$lib/server/state';
+import { members, activeRooms } from '$lib/server/state';
 import { MemberInfo, StatusSubmission, SSEvents, type MemberUpdateMessage } from '$lib/schemas';
-import { chatEmitter } from '$lib/server/emitters';
+import { chatEmitter, startHeartbeat } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
@@ -11,11 +11,13 @@ export const load = (async ({ params }) => {
 	if (!isRoute.success) throw error(404, 'There be dragons...');
 	const title = roomId;
 	const roomMembers = members;
+	const roomActive = activeRooms.has(roomId);
 	return {
 		room: {
 			id: roomId,
 			title,
-			roomMembers
+			roomMembers,
+			roomActive
 		}
 	};
 }) satisfies PageServerLoad;
@@ -31,6 +33,9 @@ export const actions = {
 				room: formData.get('room')
 			};
 			const parsed = StatusSubmission.parse(chatObj);
+			if (!activeRooms.has(parsed.room)) {
+				return fail(400, { error: 'Room is not active.' });
+			}
 			const useruid = parsed.useruid;
 			//@ts-ignore
 			delete parsed.useruid;
@@ -56,5 +61,17 @@ export const actions = {
 			}
 			return fail(500, { error: 'An unexpected error occurred.' });
 		}
+	},
+	start: async ({ request }) => {
+		const formData = await request.formData();
+		const room = formData.get('room');
+		if (room === null) {
+			return fail(400, { error: 'Missing room param.' });
+		}
+		activeRooms.add(room.toString());
+
+		startHeartbeat();
+
+		return { status: 200 };
 	}
 } satisfies Actions;
