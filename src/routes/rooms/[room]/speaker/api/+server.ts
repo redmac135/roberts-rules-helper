@@ -1,6 +1,6 @@
 import { StatusSubmission, type MemberUpdateMessage, SSEvents } from '$lib/schemas.js';
 import { chatEmitter } from '$lib/server/emitters.js';
-import members from '$lib/server/state';
+import { members } from '$lib/server/state';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request }) {

@@ -4,7 +4,7 @@
 	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
-	import { SSEvents } from '$lib/schemas';
+	import { HeartBeat, SSEvents } from '$lib/schemas';
 	import { v4 as uuid } from 'uuid';
 
 	export let form: ActionData;
@@ -50,34 +50,56 @@
 
 	onMount(() => {
 		showModal = true;
-		const source = new EventSource(`/rooms/${roomId}/activity`, {
-			withCredentials: false
-		});
-		const event = SSEvents[roomId as keyof typeof SSEvents];
-		source.addEventListener(event, (e) => {
-			let message = JSON.parse(e.data);
-			if (message[1].type === 'set') {
-				messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
-				// if it's ourselves -> update self status
-				if (message[0] === $user.uid) {
-					selectedValue = message[1].status;
-					user.update(($user) => {
-						$user.name = message[1].name;
-						return $user;
+		let source: EventSource;
+		// constant refreshing of Event Source
+		let keepAliveTimer: NodeJS.Timeout | null = null;
+
+		function gotActivity() {
+			if (keepAliveTimer != null) {
+				clearTimeout(keepAliveTimer);
+			}
+			keepAliveTimer = setTimeout(() => {
+				gotActivity();
+			}, 30000);
+		}
+		connect();
+
+		function connect() {
+			gotActivity();
+			source = new EventSource(`/rooms/${roomId}/activity`, {
+				withCredentials: false
+			});
+			const event = SSEvents[roomId as keyof typeof SSEvents];
+			source.addEventListener(event, (e) => {
+				let message = JSON.parse(e.data);
+				if (message.beat == HeartBeat.beat) {
+					gotActivity();
+					return;
+				}
+				if (message[1].type === 'set') {
+					messageStore.update(($messageStore) => $messageStore.set(message[0], message[1]));
+					// if it's ourselves -> update self status
+					if (message[0] === $user.uid) {
+						selectedValue = message[1].status;
+						user.update(($user) => {
+							$user.name = message[1].name;
+							return $user;
+						});
+					}
+				}
+				if (message[1].type === 'changename') {
+					messageStore.update(($messageStore) => {
+						let obj = $messageStore.get(message[0]);
+						if (obj === undefined) {
+							return $messageStore;
+						}
+						obj.name = message[1].name;
+						return $messageStore.set(message[0], obj);
 					});
 				}
-			}
-			if (message[1].type === 'changename') {
-				messageStore.update(($messageStore) => {
-					let obj = $messageStore.get(message[0]);
-					if (obj === undefined) {
-						return $messageStore;
-					}
-					obj.name = message[1].name;
-					return $messageStore.set(message[0], obj);
-				});
-			}
-		});
+			});
+		}
+
 		return () => {
 			source.close();
 		};
@@ -139,7 +161,12 @@
 		<input type="hidden" name="useruid" value={$user.uid} />
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$user.status} />
-		<input type="text" on:focus={event => event.target?.select()} name="name" value={$user.name} />
+		<input
+			type="text"
+			on:focus={(event) => event.target?.select()}
+			name="name"
+			value={$user.name}
+		/>
 		{#if form?.error}
 			<p class="error" id="error">{form.error}</p>
 		{/if}

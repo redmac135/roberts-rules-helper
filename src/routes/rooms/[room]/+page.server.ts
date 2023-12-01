@@ -1,4 +1,4 @@
-import members from '$lib/server/state';
+import {members, activeRooms} from '$lib/server/state';
 import {
 	MemberInfo,
 	NameChangeSubmission,
@@ -37,6 +37,9 @@ export const actions = {
 				room: formData.get('room')
 			};
 			const parsed = StatusSubmission.parse(chatObj);
+			if (!activeRooms.has(parsed.room)) {
+				return fail(400, { error: 'Room is not active.' });
+			}
 			const useruid = parsed.useruid;
 			//@ts-ignore
 			delete parsed.useruid;
