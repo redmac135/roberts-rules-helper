@@ -17,7 +17,7 @@ export function stopHeartbeat() {
 export const startHeartbeat = () => {
 	stopHeartbeat();
 	heart = setInterval(() => {
-		console.log('Heartbeat');
+		console.log(new Date().toLocaleTimeString('en-US'), 'Heartbeat');
 		activeRooms.forEach((room) => {
 			chatEmitter.emit(SSEvents[room as keyof typeof SSEvents], HeartBeat);
 		});
