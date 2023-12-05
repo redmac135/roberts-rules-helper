@@ -17,7 +17,7 @@
 
 	let uid: string;
 	let name: string;
-	let connectionStatus: ConnectionStatus = 'disconnected';
+	let connectionStatus: ConnectionStatus = 'reconnecting';
 	if (browser) {
 		const userPreferedName = localStorage.getItem('user-name');
 		const userPrevuid = localStorage.getItem('useruid');

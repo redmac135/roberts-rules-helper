@@ -25,4 +25,5 @@ export const SSEvents = {
 
 export const HeartBeat = { beat: 'beat' };
 
+// 'disconnected' is not actually used, but kept because I might need it
 export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
