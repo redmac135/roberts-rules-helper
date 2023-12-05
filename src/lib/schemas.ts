@@ -24,3 +24,5 @@ export const SSEvents = {
 };
 
 export const HeartBeat = { beat: 'beat' };
+
+export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';

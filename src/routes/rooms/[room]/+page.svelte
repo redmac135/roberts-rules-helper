@@ -4,7 +4,7 @@
 	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
-	import { HeartBeat, SSEvents } from '$lib/schemas';
+	import { HeartBeat, SSEvents, type ConnectionStatus } from '$lib/schemas';
 	import { v4 as uuid } from 'uuid';
 
 	export let form: ActionData;
@@ -17,6 +17,7 @@
 
 	let uid: string;
 	let name: string;
+	let connectionStatus: ConnectionStatus = 'disconnected';
 	if (browser) {
 		const userPreferedName = localStorage.getItem('user-name');
 		const userPrevuid = localStorage.getItem('useruid');
@@ -60,9 +61,9 @@
 			}
 			keepAliveTimer = setTimeout(() => {
 				gotActivity();
+				connectionStatus = 'reconnecting';
 			}, 30000);
 		}
-		connect();
 
 		function connect() {
 			gotActivity();
@@ -74,6 +75,7 @@
 				let message = JSON.parse(e.data);
 				if (message.beat == HeartBeat.beat) {
 					gotActivity();
+					connectionStatus = 'connected';
 					return;
 				}
 				if (message[1].type === 'set') {
@@ -99,6 +101,8 @@
 				}
 			});
 		}
+
+		connect();
 
 		return () => {
 			source.close();
@@ -167,7 +171,7 @@
 			name="name"
 			value={$user.name}
 		/>
-		{#if form?.error}
+		{#if form?.error && form?.formName === 'changename'}
 			<p class="error" id="error">{form.error}</p>
 		{/if}
 		<button type="submit">Set Name</button>
@@ -176,26 +180,23 @@
 
 <h1>{title.toUpperCase()}</h1>
 
+<p class="connectionstatus">{connectionStatus}</p>
+
 <form
 	method="post"
 	action="?/setstatus"
 	bind:this={formElem}
 	on:submit|preventDefault
-	use:enhance={({ formElement, formData }) => {
+	use:enhance={({ formData }) => {
 		formData.set('status', selectedValue);
 		user.update((obj) => ({ uid: obj.uid, name: name, status: selectedValue }));
-		return async ({ update }) => {
-			// Don't know why but this line just works
-			formElement.children[99].setAttribute('checked', 'true');
-			await update();
-		};
 	}}
 >
 	<StatusOptions {choices} bind:selectedValue {toggleOption} />
 	<input type="hidden" name="room" value={data.room.id} />
 	<input type="hidden" name="useruid" value={$user.uid} />
 	<input type="hidden" name="name" value={$user.name} />
-	{#if form?.error}
+	{#if form?.error && form?.formName === 'setstatus'}
 		<p class="error" id="error">{form.error}</p>
 	{/if}
 </form>
@@ -207,6 +208,12 @@
 		color: red;
 		font-weight: bold;
 		font-size: 1rem;
+	}
+
+	.connectionstatus {
+		color: white;
+		text-align: center;
+		padding-bottom: 1rem;
 	}
 
 	.right {
@@ -226,7 +233,6 @@
 	}
 
 	h1 {
-		padding: 1rem;
 		text-align: center;
 		color: white;
 	}

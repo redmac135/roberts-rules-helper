@@ -1,4 +1,4 @@
-import {members, activeRooms} from '$lib/server/state';
+import { members, activeRooms } from '$lib/server/state';
 import {
 	MemberInfo,
 	NameChangeSubmission,
@@ -38,7 +38,7 @@ export const actions = {
 			};
 			const parsed = StatusSubmission.parse(chatObj);
 			if (!activeRooms.has(parsed.room)) {
-				return fail(400, { error: 'Room is not active.' });
+				return fail(400, { formName: 'setstatus', error: 'Room is not active.' });
 			}
 			const useruid = parsed.useruid;
 			//@ts-ignore
@@ -60,10 +60,10 @@ export const actions = {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));
 				if (textError) {
-					return fail(400, { error: textError.message });
+					return fail(400, { formName: 'setstatus', error: textError.message });
 				}
 			}
-			return fail(500, { error: 'An unexpected error occurred.' });
+			return fail(500, { formName: 'setstatus', error: 'An unexpected error occurred.' });
 		}
 	},
 	changename: async ({ request }) => {
@@ -77,7 +77,7 @@ export const actions = {
 			};
 			// TODO: fix this bandaid solution to zod not throwing error when name.length == 0
 			if (chatObj.name?.toString().length === 0) {
-				return fail(400, { error: 'Name cannot be blank.' });
+				return fail(400, { formName: 'changename', error: 'Name cannot be blank.' });
 			}
 			const parsed = NameChangeSubmission.parse(chatObj);
 			const newuseruid = parsed.useruid;
@@ -89,10 +89,10 @@ export const actions = {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));
 				if (textError) {
-					return fail(400, { error: textError.message });
+					return fail(400, { formName: 'changename', error: textError.message });
 				}
 			}
-			return fail(500, { error: 'An unexpected error occurred.' }); // TODO: make work
+			return fail(500, { formName: 'changename', error: 'An unexpected error occurred.' }); // TODO: make work
 		}
 	}
 } satisfies Actions;
