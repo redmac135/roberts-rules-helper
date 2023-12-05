@@ -37,7 +37,7 @@
 	}
 
 	const {
-		room: { roomMembers, title, id: roomId }
+		room: { roomMembers, title, heartbeatInterval, id: roomId }
 	} = data;
 
 	type UserInfo = {
@@ -62,7 +62,7 @@
 			keepAliveTimer = setTimeout(() => {
 				gotActivity();
 				connectionStatus = 'reconnecting';
-			}, 30000);
+			}, 1.5 * heartbeatInterval);
 		}
 
 		function connect() {
@@ -137,6 +137,9 @@
 	let showModal: boolean;
 	let dialog: HTMLDialogElement;
 	$: user.update((obj) => ({ uid: uid, name: name, status: obj.status }));
+
+	// hacky solution to show status errors
+	let statusFormError: string = '';
 </script>
 
 <StatusBar name={$user?.name} status={$user.status} bind:showModal />
@@ -190,14 +193,17 @@
 	use:enhance={({ formData }) => {
 		formData.set('status', selectedValue);
 		user.update((obj) => ({ uid: obj.uid, name: name, status: selectedValue }));
+		return async () => {
+			return;
+		};
 	}}
 >
 	<StatusOptions {choices} bind:selectedValue {toggleOption} />
 	<input type="hidden" name="room" value={data.room.id} />
 	<input type="hidden" name="useruid" value={$user.uid} />
 	<input type="hidden" name="name" value={$user.name} />
-	{#if form?.error && form?.formName === 'setstatus'}
-		<p class="error" id="error">{form.error}</p>
+	{#if statusFormError !== ''}
+		<p class="error" id="error">{statusFormError}</p>
 	{/if}
 </form>
 
