@@ -1,3 +1,4 @@
+import { HEARTBEAT_INTERVAL } from '$lib';
 import { SSEvents, HeartBeat } from '$lib/schemas';
 import { activeRooms } from './state';
 import { EventEmitter } from 'events';
@@ -21,5 +22,5 @@ export const startHeartbeat = () => {
 		activeRooms.forEach((room) => {
 			chatEmitter.emit(SSEvents[room as keyof typeof SSEvents], HeartBeat);
 		});
-	}, 1000 * 3);
+	}, HEARTBEAT_INTERVAL);
 };

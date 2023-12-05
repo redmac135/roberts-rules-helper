@@ -10,6 +10,7 @@ import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
+import { HEARTBEAT_INTERVAL } from '$lib';
 
 export const load = (async ({ params }) => {
 	const { room: roomId } = params;
@@ -21,7 +22,8 @@ export const load = (async ({ params }) => {
 		room: {
 			id: roomId,
 			title,
-			roomMembers
+			roomMembers,
+			heartbeatInterval: HEARTBEAT_INTERVAL
 		}
 	};
 }) satisfies PageServerLoad;
