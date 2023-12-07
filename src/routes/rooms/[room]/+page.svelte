@@ -60,8 +60,8 @@
 				clearTimeout(keepAliveTimer);
 			}
 			keepAliveTimer = setTimeout(() => {
-				gotActivity();
 				connectionStatus = 'reconnecting';
+				connect();
 			}, 1.5 * heartbeatInterval);
 		}
 
@@ -74,8 +74,8 @@
 			source.addEventListener(event, (e) => {
 				let message = JSON.parse(e.data);
 				if (message.beat == HeartBeat.beat) {
-					gotActivity();
 					connectionStatus = 'connected';
+					gotActivity();
 					return;
 				}
 				if (message[1].type === 'set') {
