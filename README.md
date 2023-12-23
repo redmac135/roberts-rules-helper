@@ -25,3 +25,7 @@ Preview app
 ```bash
 npm run preview
 ```
+
+---
+
+Copyright 2023 Ethan Zhao
