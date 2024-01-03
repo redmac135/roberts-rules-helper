@@ -15,8 +15,8 @@
 	import StatusOptions from '$lib/components/StatusOptions.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';
 
-	let uid: string;
-	let name: string;
+	let uid = uuid();
+	let name = 'tmp-' + uid;
 	let connectionStatus: ConnectionStatus = 'reconnecting';
 	if (browser) {
 		const userPreferedName = localStorage.getItem('user-name');
@@ -24,14 +24,12 @@
 		if (userPrevuid) {
 			uid = userPrevuid;
 		} else {
-			uid = uuid();
 			// TODO: set an expiry on this local storage and make sure that it's room specific
 			localStorage.setItem('useruid', uid);
 		}
 		if (userPreferedName) {
 			name = userPreferedName;
 		} else {
-			name = 'tmp-' + uid;
 			localStorage.setItem('user-name', name);
 		}
 	}
@@ -140,6 +138,7 @@
 
 	// hacky solution to show status errors
 	let statusFormError: string = '';
+	let changeNameElement: HTMLInputElement;
 </script>
 
 <StatusBar name={$user?.name} status={$user.status} bind:showModal />
@@ -169,8 +168,9 @@
 		<input type="hidden" name="room" value={data.room.id} />
 		<input type="hidden" name="status" value={$user.status} />
 		<input
+			bind:this={changeNameElement}
 			type="text"
-			on:focus={(event) => event.target?.select()}
+			on:focus={() => changeNameElement.select()}
 			name="name"
 			value={$user.name}
 		/>

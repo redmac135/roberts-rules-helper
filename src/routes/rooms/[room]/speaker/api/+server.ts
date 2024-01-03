@@ -13,13 +13,11 @@ export async function POST({ request }) {
 			status: 'standby'
 		};
 		const parsed = StatusSubmission.parse(chatObj);
-		let useruid = parsed.useruid;
-		delete parsed.useruid;
 		const message: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
-		members.set(useruid, message);
+		members.set(parsed.useruid, message);
 
-		chatEmitter.emit(SSEvents.general, [useruid, message]);
-		chatEmitter.emit(SSEvents[message.room], [useruid, message]);
+		chatEmitter.emit(SSEvents.general, [parsed.useruid, message]);
+		chatEmitter.emit(SSEvents[message.room], [parsed.useruid, message]);
 		return new Response('success', { status: 200 });
 	} catch (error) {
 		console.log(error);

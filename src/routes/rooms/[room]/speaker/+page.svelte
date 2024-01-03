@@ -16,7 +16,7 @@
 
 	onMount(() => {
 		let source: EventSource;
-		let keepAliveTimer: NodeJS.Timeout | null = null;
+		let keepAliveTimer: ReturnType<typeof setTimeout> | null = null;
 		function gotActivity() {
 			if (keepAliveTimer != null) {
 				clearTimeout(keepAliveTimer);
