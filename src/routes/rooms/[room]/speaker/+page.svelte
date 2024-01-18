@@ -21,7 +21,7 @@
 				clearTimeout(keepAliveTimer);
 			}
 			keepAliveTimer = setTimeout(() => {
-				gotActivity();
+				connect();
 			}, 30000);
 		}
 		connect();

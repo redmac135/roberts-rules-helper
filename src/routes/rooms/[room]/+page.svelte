@@ -60,7 +60,7 @@
 				clearTimeout(keepAliveTimer);
 			}
 			keepAliveTimer = setTimeout(() => {
-				gotActivity();
+				connect();
 				connectionStatus = 'reconnecting';
 			}, 1.5 * heartbeatInterval);
 		}
