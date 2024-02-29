@@ -1,9 +1,10 @@
 import { members, activeRooms } from '$lib/server/state';
 import { MemberInfo, StatusSubmission, SSEvents, type MemberUpdateMessage } from '$lib/schemas';
 import { chatEmitter, startHeartbeat } from '$lib/server/emitters';
-import type { PageServerLoad, Actions } from './$types';
+import type { PageServerLoad, Actions } from '../$types';
 import { error, fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
+import { HEARTBEAT_INTERVAL } from '$lib';
 
 export const load = (async ({ params }) => {
 	const { room: roomId } = params;
@@ -17,7 +18,8 @@ export const load = (async ({ params }) => {
 			id: roomId,
 			title,
 			roomMembers,
-			roomActive
+			roomActive,
+			heartbeatInterval: HEARTBEAT_INTERVAL
 		}
 	};
 }) satisfies PageServerLoad;

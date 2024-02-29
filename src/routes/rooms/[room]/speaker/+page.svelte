@@ -1,30 +1,32 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { HeartBeat, SSEvents } from '$lib/schemas';
+	import { HeartBeat, SSEvents, type ConnectionStatus } from '$lib/schemas';
 	import StatusLists from '$lib/components/StatusLists.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';
 	import { enhance } from '$app/forms';
 
 	export let data;
+	let connectionStatus: ConnectionStatus = 'reconnecting';
 	const {
-		room: { roomMembers, title, id: roomId, roomActive }
+		room: { roomMembers, title, id: roomId, roomActive, heartbeatInterval }
 	} = data;
 	const messageStore = writable(roomMembers);
 	let active = writable<boolean>(roomActive);
 
 	onMount(() => {
 		let source: EventSource;
-		let keepAliveTimer: NodeJS.Timeout | null = null;
+		let keepAliveTimer: ReturnType<typeof setTimeout> | null = null;
 		function gotActivity() {
 			if (keepAliveTimer != null) {
 				clearTimeout(keepAliveTimer);
 			}
 			keepAliveTimer = setTimeout(() => {
+				connectionStatus = 'reconnecting';
 				connect();
-			}, 30000);
+			}, 1.5 * heartbeatInterval);
 		}
-		connect();
+
 		function connect() {
 			source = new EventSource(`/rooms/${roomId}/activity`, {
 				withCredentials: false
@@ -33,6 +35,7 @@
 			source.addEventListener(event, (e) => {
 				let message = JSON.parse(e.data);
 				if (message.beat == HeartBeat.beat) {
+					connectionStatus = 'connected';
 					gotActivity();
 					return;
 				}
@@ -51,6 +54,9 @@
 				}
 			});
 		}
+
+		connect();
+
 		return () => {
 			source.close();
 		};
@@ -59,6 +65,7 @@
 
 <StatusBar name={'SPEAKER'} status={''} />
 <h1>{title.toUpperCase()}</h1>
+<p class="connectionstatus">{connectionStatus}</p>
 <StatusLists {messageStore} clickable={true} />
 
 <form
@@ -83,6 +90,12 @@
 		padding: 1rem;
 		text-align: center;
 		color: white;
+	}
+
+	.connectionstatus {
+		color: white;
+		text-align: center;
+		padding-bottom: 1rem;
 	}
 
 	form {

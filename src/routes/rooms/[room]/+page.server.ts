@@ -8,7 +8,7 @@ import {
 } from '$lib/schemas';
 import { chatEmitter } from '$lib/server/emitters';
 import type { PageServerLoad, Actions } from './$types';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
 import { HEARTBEAT_INTERVAL } from '$lib';
 
