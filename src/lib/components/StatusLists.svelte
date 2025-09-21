@@ -9,11 +9,10 @@
 <div class="list-container">
 	<StatusList title="poi">
 		{#if [...$messageStore].filter((member) => member[1].status == 'poi').length > 0}
+			<p>count: {[...$messageStore].filter((member) => member[1].status == 'poi').length}</p>
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'poi')
-				.sort((a, b) => {
-					return a[1].set_at - b[1].set_at;
-				}) as msg (msg[0])}
+				.sort((a, b) => a[1].set_at - b[1].set_at) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="poi"
@@ -30,11 +29,10 @@
 	</StatusList>
 	<StatusList title="response">
 		{#if [...$messageStore].filter((member) => member[1].status == 'response').length > 0}
+			<p>count: {[...$messageStore].filter((member) => member[1].status == 'response').length}</p>
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'response')
-				.sort((a, b) => {
-					return a[1].set_at - b[1].set_at;
-				}) as msg (msg[0])}
+				.sort((a, b) => a[1].set_at - b[1].set_at) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="response"
@@ -51,11 +49,10 @@
 	</StatusList>
 	<StatusList title="point">
 		{#if [...$messageStore].filter((member) => member[1].status == 'point').length > 0}
+			<p>count: {[...$messageStore].filter((member) => member[1].status == 'point').length}</p>
 			{#each [...$messageStore]
 				.filter((member) => member[1].status == 'point')
-				.sort((a, b) => {
-					return a[1].set_at - b[1].set_at;
-				}) as msg (msg[0])}
+				.sort((a, b) => a[1].set_at - b[1].set_at) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="point"
