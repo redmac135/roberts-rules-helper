@@ -73,5 +73,13 @@
 	.list-container {
 		display: flex;
 		justify-content: center;
+		gap: 1rem;
+	}
+
+	@media (max-width: 600px) {
+		.list-container {
+			flex-direction: column;
+			align-items: center;
+		}
 	}
 </style>

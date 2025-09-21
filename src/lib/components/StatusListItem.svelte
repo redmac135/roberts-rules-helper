@@ -23,8 +23,8 @@
 </script>
 
 <button type="button" class="status-btn" on:click={setStandby}>
-	<div class="wrapper" style="background-color: {colorMap.get(status)};">
-		{name}
+	<div class="wrapper" style="background-color: {colorMap.get(status)};" title={name}>
+		<span class="clamp multiline">{name}</span>
 	</div>
 </button>
 
@@ -39,6 +39,18 @@
 		padding: 0.5rem;
 		margin-top: 0.25rem;
 		margin-bottom: 0.25rem;
+	}
+
+	.clamp {
+		display: block;
+		max-width: 100%;
+	}
+
+	.multiline {
+		white-space: normal;
+		word-break: break-word;
+		overflow-wrap: anywhere;
+		overflow: hidden;
 	}
 
 	.status-btn {
