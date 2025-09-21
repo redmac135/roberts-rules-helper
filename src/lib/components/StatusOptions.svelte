@@ -8,11 +8,11 @@
 
 	export let choices: choiceType[];
 	export let selectedValue: string;
-	export let toggleOption: Function;
+	export let toggleOption: (value: string) => void;
 </script>
 
 <div class="wrapper">
-	{#each choices as choice}
+	{#each choices as choice (choice.value)}
 		<label>
 			<input
 				type="radio"
@@ -20,7 +20,9 @@
 				value={choice.value}
 				on:click={() => toggleOption(choice.value)}
 			/>
-			<div class="noselect" style="background-color: {colorMap.get(choice.value)};">{choice.label}</div>
+			<div class="noselect" style="background-color: {colorMap.get(choice.value)};">
+				{choice.label}
+			</div>
 		</label>
 	{/each}
 </div>
@@ -39,7 +41,9 @@
 		height: 6rem;
 		border-radius: 0.5rem;
 		opacity: 1;
-		transition: scale 200ms, opacity 200ms;
+		transition:
+			scale 200ms,
+			opacity 200ms;
 	}
 
 	:checked + div {
@@ -52,12 +56,12 @@
 	}
 
 	.noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 	}
 

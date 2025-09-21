@@ -6,11 +6,11 @@
 
 <header>
 	<div class="wrapper">
-		<a
-			href="/"
-			on:click|preventDefault={() => {
+		<button
+			class="name-btn"
+			on:click={() => {
 				showModal = true;
-			}}>{name}</a
+			}}>{name}</button
 		>
 		<p>{status}</p>
 	</div>
@@ -31,7 +31,13 @@
 		padding: 1rem;
 	}
 
-	a {
-		text-decoration: none;
+	.name-btn {
+		all: unset;
+		cursor: pointer;
+	}
+
+	.name-btn:focus {
+		outline: 2px solid white;
+		outline-offset: 2px;
 	}
 </style>

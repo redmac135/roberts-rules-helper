@@ -63,7 +63,7 @@
 	});
 </script>
 
-<StatusBar name={'SPEAKER'} status={''} />
+<StatusBar name="SPEAKER" status="" />
 <h1>{title.toUpperCase()}</h1>
 <p class="connectionstatus">{connectionStatus}</p>
 <StatusLists {messageStore} clickable={true} />

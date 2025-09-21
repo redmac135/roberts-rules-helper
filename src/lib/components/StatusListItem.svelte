@@ -22,11 +22,11 @@
 	}
 </script>
 
-<a href="/" on:click|preventDefault={setStandby}>
+<button type="button" class="status-btn" on:click={setStandby}>
 	<div class="wrapper" style="background-color: {colorMap.get(status)};">
 		{name}
 	</div>
-</a>
+</button>
 
 <style>
 	.wrapper {
@@ -41,7 +41,13 @@
 		margin-bottom: 0.25rem;
 	}
 
-	a {
-		text-decoration: none;
+	.status-btn {
+		all: unset;
+		cursor: pointer;
+	}
+
+	.status-btn:focus {
+		outline: 2px solid white;
+		outline-offset: 2px;
 	}
 </style>

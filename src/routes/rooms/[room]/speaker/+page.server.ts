@@ -39,17 +39,25 @@ export const actions = {
 				return fail(400, { error: 'Room is not active.' });
 			}
 			const useruid = parsed.useruid;
-			//@ts-ignore
-			delete parsed.useruid;
+			if (!useruid) {
+				return fail(400, { error: 'Missing useruid.' });
+			}
 			if (members.get(useruid) === undefined) {
-				members.set(useruid, { set_at: Date.now(), ...parsed });
+				members.set(useruid, {
+					set_at: Date.now(),
+					name: parsed.name,
+					status: parsed.status,
+					room: parsed.room
+				});
 			}
 			const message: MemberUpdateMessage = {
 				set_at: Date.now(),
 				type: 'set',
-				...parsed
+				useruid,
+				name: parsed.name,
+				status: parsed.status,
+				room: parsed.room
 			};
-
 			members.set(useruid, message);
 
 			chatEmitter.emit(SSEvents.general, [useruid, message]);
@@ -70,6 +78,13 @@ export const actions = {
 		if (room === null) {
 			return fail(400, { error: 'Missing room param.' });
 		}
+
+		// if room is already in activeRooms, return
+		if (activeRooms.has(room.toString())) {
+			startHeartbeat();
+			return { status: 200 };
+		}
+
 		activeRooms.add(room.toString());
 
 		startHeartbeat();

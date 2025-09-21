@@ -43,21 +43,32 @@ export const actions = {
 				return fail(400, { formName: 'setstatus', error: 'Room is not active.' });
 			}
 			const useruid = parsed.useruid;
-			//@ts-ignore
-			delete parsed.useruid;
+			if (!useruid) {
+				return fail(400, { formName: 'setstatus', error: 'Missing useruid.' });
+			}
 			if (members.get(useruid) === undefined) {
-				members.set(useruid, { set_at: Date.now(), ...parsed });
+				members.set(useruid, {
+					set_at: Date.now(),
+					name: parsed.name,
+					status: parsed.status,
+					room: parsed.room
+				});
 			}
 			const message: MemberUpdateMessage = {
 				set_at: Date.now(),
 				type: 'set',
-				...parsed
+				useruid,
+				name: parsed.name,
+				status: parsed.status,
+				room: parsed.room
 			};
 
 			members.set(useruid, message);
 
 			chatEmitter.emit(SSEvents.general, [useruid, message]);
 			chatEmitter.emit(SSEvents[message.room], [useruid, message]);
+
+			return { success: true };
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));
@@ -83,10 +94,20 @@ export const actions = {
 			}
 			const parsed = NameChangeSubmission.parse(chatObj);
 			const newuseruid = parsed.useruid;
-			//@ts-ignore
-			delete parsed.useruid;
-			const newMemberInfo: MemberUpdateMessage = { set_at: Date.now(), type: 'set', ...parsed };
+			if (!newuseruid) {
+				return fail(400, { formName: 'changename', error: 'Missing useruid.' });
+			}
+			const newMemberInfo: MemberUpdateMessage = {
+				set_at: Date.now(),
+				type: 'set',
+				useruid: newuseruid,
+				name: parsed.name,
+				status: parsed.status,
+				room: parsed.room
+			};
 			chatEmitter.emit(SSEvents[newMemberInfo.room], [newuseruid, newMemberInfo]);
+
+			return { success: true };
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const textError = error.issues.find((iss) => iss.path.includes('text'));

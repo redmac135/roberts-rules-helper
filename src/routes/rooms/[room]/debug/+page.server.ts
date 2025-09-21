@@ -7,7 +7,7 @@ export const actions = {
 		try {
 			members.clear();
 		} catch (error) {
-			return fail(500, { error: 'An unexpected error occurred.' });
+			return fail(500, { error, message: 'An unexpected error occurred.' });
 		}
 	},
 	deactivateRooms: async () => {
@@ -15,7 +15,7 @@ export const actions = {
 			activeRooms.clear();
 			stopHeartbeat();
 		} catch (error) {
-			return fail(500, { error: 'An unexpected error occurred.' });
+			return fail(500, { error, message: 'An unexpected error occurred.' });
 		}
 	}
 };

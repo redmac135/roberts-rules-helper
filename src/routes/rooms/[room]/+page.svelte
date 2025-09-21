@@ -117,7 +117,7 @@
 
 	let selectedValue = 'standby';
 
-	function toggleOption(value: 'poi' | 'point' | 'response' | 'standby') {
+	function toggleOption(value: string) {
 		if (selectedValue === value) {
 			selectedValue = 'standby';
 		} else {
@@ -127,8 +127,16 @@
 	}
 
 	function resetUid() {
+		// reset uid
 		uid = uuid();
 		localStorage.setItem('useruid', uid);
+
+		// reset name
+		name = 'tmp-' + uid;
+		localStorage.setItem('user-name', name);
+
+		// display modal
+		showModal = true;
 	}
 
 	// Modal and name logic
@@ -154,7 +162,6 @@
 			if (newname === undefined) return; // TODO: this function should raise error from zod
 			return ({ result, update }) => {
 				if (result.type === 'success') {
-					//@ts-ignore
 					name = newname;
 					localStorage.setItem('user-name', name);
 					dialog.close();

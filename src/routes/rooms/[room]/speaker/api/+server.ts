@@ -3,7 +3,7 @@ import { chatEmitter } from '$lib/server/emitters.js';
 import { members } from '$lib/server/state';
 
 /** @type {import('./$types').RequestHandler} */
-export async function POST({ request }) {
+export async function POST({ request }: { request: Request }) {
 	try {
 		const { uid, name, room } = await request.json();
 		const chatObj = {

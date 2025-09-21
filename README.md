@@ -12,20 +12,21 @@ A helper app used to synchronize the use of Robert's Rules for councils.
 ## Preview
 
 Install dependencies
+
 ```bash
 npm ci
 ```
 
 Build app
+
 ```bash
 npm run build
 ```
 
 Preview app
+
 ```bash
 npm run preview
 ```
 
 ---
-
-Copyright 2023 Ethan Zhao

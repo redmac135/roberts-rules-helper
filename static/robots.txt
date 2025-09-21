@@ -1,0 +1,4 @@
+# only allow crawling on home page
+User-agent: *
+Disallow: /
+Allow: /$

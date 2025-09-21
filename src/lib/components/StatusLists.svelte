@@ -13,7 +13,7 @@
 				.filter((member) => member[1].status == 'poi')
 				.sort((a, b) => {
 					return a[1].set_at - b[1].set_at;
-				}) as msg}
+				}) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="poi"
@@ -34,7 +34,7 @@
 				.filter((member) => member[1].status == 'response')
 				.sort((a, b) => {
 					return a[1].set_at - b[1].set_at;
-				}) as msg}
+				}) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="response"
@@ -55,7 +55,7 @@
 				.filter((member) => member[1].status == 'point')
 				.sort((a, b) => {
 					return a[1].set_at - b[1].set_at;
-				}) as msg}
+				}) as msg (msg[0])}
 				<li>
 					<StatusListItem
 						status="point"
